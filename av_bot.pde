@@ -1,10 +1,11 @@
+//Robot Code
 
 // servo
 #include <Servo.h> 
 Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable to store the servo position 
 
-// sonar
+// sonar code, mostly taken from luckylarry.co.uk
 const int numOfReadings = 5;                   // number of readings to take/ items in the array
 int readings[numOfReadings];                    // stores the distance readings in an array
 int arrayIndex = 0;                             // arrayIndex of the current item in the array
@@ -16,7 +17,7 @@ int initPin = 3;                                // SRF05 trigger pin (digital 3)
 unsigned long pulseTime = 0;                    // stores the pulse in Micro Seconds
 unsigned long distance = 0;                     // variable for storing the distance (cm)
 
-//Arduino PWM Speed Control：
+//Arduino PWM Speed Control based upon code from dfrobot：
 const int E1 = 6;   
 const int M1 = 7;
 const int E2 = 5;                         
@@ -30,7 +31,7 @@ const int IRsensorFr = 0;     // pin that the FRONT right sensor is attached to
 int sensorValue = 0;
 
 // LED pin
-const int ledPin =  13;      // the number of the LED pin
+const int ledPin =  13;
 
 void setup() 
 { 
@@ -87,7 +88,7 @@ void loop()
   Serial.println(averageDistance, DEC); 
   
   
-  // while the front sensor reading is low, backwards:
+  // while the front sensor reading is low
   if (analogRead(IRsensorFm) <= 300) {
   sensorValue = analogRead(IRsensorFm);
   //Serial.println(sensorValue);
@@ -97,6 +98,7 @@ void loop()
   turnleft(800);
   stopmoter(1000);
   }
+  // while the front left sensor reading is low
   else if (analogRead(IRsensorFl) <= 300) {
   digitalWrite(ledPin, HIGH);
   stopmoter(1000);
@@ -105,6 +107,7 @@ void loop()
   turnright(400);
   stopmoter(1000);
   }
+  // while the front right sensor reading is low
   else if (analogRead(IRsensorFr) <= 300) {
   digitalWrite(ledPin, HIGH);  
   stopmoter(1000);
