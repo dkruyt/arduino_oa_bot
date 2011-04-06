@@ -5,8 +5,15 @@
 Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable to store the servo position 
 
+int PosValue[] = {15,40,145,180};
+
+int h;
+
+int Sensor[4];
+int j,Maximum,Position;
+
 // sonar code, mostly taken from luckylarry.co.uk
-const int numOfReadings = 5;                   // number of readings to take/ items in the array
+const int numOfReadings = 10;                   // number of readings to take/ items in the array
 int readings[numOfReadings];                    // stores the distance readings in an array
 int arrayIndex = 0;                             // arrayIndex of the current item in the array
 int total = 0;                                  // stores the cumlative total
@@ -63,40 +70,56 @@ readings[thisReading] = 0;
  
 void loop() 
 { 
-  //myservo.write(45);              // tell servo to go to position in variable 'pos' 
-  
-  //delay(1000);
-  
-  digitalWrite(initPin, HIGH);                    // send 10 microsecond pulse
-  delayMicroseconds(10);                  // wait 10 microseconds before turning off
-  digitalWrite(initPin, LOW);                     // stop sending the pulse
-  pulseTime = pulseIn(echoPin, HIGH);             // Look for a return pulse, it should be high as the pulse goes low-high-low
-  distance = pulseTime/58;                        // Distance = pulse time / 58 to convert to cm.
-  total= total - readings[arrayIndex];           // subtract the last distance
-  readings[arrayIndex] = distance;                // add distance reading to array
-  total= total + readings[arrayIndex];            // add the reading to the total
-  arrayIndex = arrayIndex + 1;                    // go to the next item in the array
-  // At the end of the array (10 items) then start again
-  if (arrayIndex >= numOfReadings)  {
-    arrayIndex = 0;
-  }
-  averageDistance = total / numOfReadings;      // calculate the average distance
-  // if the distance is less than xx then change direction
-  if (averageDistance < 30) {
-    turnleft(200);
-  }
-  Serial.println(averageDistance, DEC); 
-  
-  
-  // while the front sensor reading is low
+  // while the front middle sensor reading is low
   if (analogRead(IRsensorFm) <= 300) {
   sensorValue = analogRead(IRsensorFm);
   //Serial.println(sensorValue);
   digitalWrite(ledPin, HIGH); 
-  stopmoter(1000);
-  backwards(400);
-  turnleft(800);
-  stopmoter(1000);
+  //stopmoter(1000);
+  //backwards(400);
+  //turnleft(800);
+  //stopmoter(1000);
+  
+   stopmoter(1000);
+   backwards(800);
+   stopmoter(500);
+   
+   // Start sensor sweep
+   
+   for(j=0;j<4;j++){ 
+   delay(500);
+   myservo.write(PosValue[j]);
+   delay(1000);
+   for(h=0;h<10;h++){ 
+   digitalWrite(initPin, HIGH);                    // send 10 microsecond pulse
+   delayMicroseconds(10);                  // wait 10 microseconds before turning off
+   digitalWrite(initPin, LOW);                     // stop sending the pulse
+   pulseTime = pulseIn(echoPin, HIGH);             // Look for a return pulse, it should be high as the pulse goes low-high-low
+   distance = pulseTime/58;                        // Distance = pulse time / 58 to convert to cm.
+   total= total - readings[arrayIndex];           // subtract the last distance
+   readings[arrayIndex] = distance;                // add distance reading to array
+   total= total + readings[arrayIndex];            // add the reading to the total
+   arrayIndex = arrayIndex + 1;                    // go to the next item in the array
+   // At the end of the array (10 items) then start again
+   if (arrayIndex >= numOfReadings)  {
+     arrayIndex = 0;
+    }
+   averageDistance = total / numOfReadings;      // calculate the average distance
+   }
+   Sensor[j]=averageDistance;
+   Serial.print("Start sweep");
+   Serial.print(j);
+   Serial.print(" ");
+   Serial.println(averageDistance, DEC); 
+   }
+   Position=MAX_Point();
+   switch(Position){
+      case 0: Serial.println("go 0");turnleft(750);; break;
+      case 1: Serial.println("go 1");turnleft(450);; break;
+      case 2: Serial.println("go 2");turnright(450);; break;
+      case 3: Serial.println("go 3");turnright(750);; break;
+   }
+   stopmoter(200);
   }
   // while the front left sensor reading is low
   else if (analogRead(IRsensorFl) <= 300) {
@@ -115,6 +138,8 @@ void loop()
   stopmoter(100);
   turnleft(400);
   stopmoter(1000);
+   
+
   }
   else {
   digitalWrite(ledPin, LOW); 
@@ -124,6 +149,17 @@ void loop()
   //delay(1000);
   
   }
+}
+
+int MAX_Point(){
+  int i,Old=0,max_;
+  for(i=0;i<4;i++){ 
+  if(Sensor[i]>Old){
+  Old=Sensor[i]; max_=i;
+      }
+    } 
+  Maximum=Old; 
+  return(max_);
 }
 
 void forward() {
